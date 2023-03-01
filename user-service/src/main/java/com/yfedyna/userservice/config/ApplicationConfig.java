@@ -1,6 +1,6 @@
-package com.yfedyna.config;
+package com.yfedyna.userservice.config;
 
-import com.yfedyna.repository.UserRepo;
+import com.yfedyna.userservice.repository.UserRepo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

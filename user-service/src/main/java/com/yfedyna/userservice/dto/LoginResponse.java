@@ -1,4 +1,4 @@
-package com.yfedyna.dto;
+package com.yfedyna.userservice.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

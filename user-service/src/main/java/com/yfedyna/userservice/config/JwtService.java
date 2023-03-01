@@ -1,4 +1,4 @@
-package com.yfedyna.config;
+package com.yfedyna.userservice.config;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;

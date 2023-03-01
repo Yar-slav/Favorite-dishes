@@ -1,13 +1,13 @@
-package com.yfedyna.service.implementation;
+package com.yfedyna.userservice.service.implementation;
 
-import com.yfedyna.config.JwtService;
-import com.yfedyna.dto.LoginResponse;
-import com.yfedyna.dto.UserLoginRequest;
-import com.yfedyna.dto.UserRegistrationRequest;
-import com.yfedyna.model.UserEntity;
-import com.yfedyna.model.UserRole;
-import com.yfedyna.repository.UserRepo;
-import com.yfedyna.service.AuthService;
+import com.yfedyna.userservice.config.JwtService;
+import com.yfedyna.userservice.dto.LoginResponse;
+import com.yfedyna.userservice.dto.UserLoginRequest;
+import com.yfedyna.userservice.dto.UserRegistrationRequest;
+import com.yfedyna.userservice.model.UserEntity;
+import com.yfedyna.userservice.model.UserRole;
+import com.yfedyna.userservice.repository.UserRepo;
+import com.yfedyna.userservice.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatusCode;

@@ -1,9 +1,9 @@
-package com.yfedyna.controller;
+package com.yfedyna.userservice.controller;
 
-import com.yfedyna.dto.UserInfoResponse;
-import com.yfedyna.model.UserEntity;
-import com.yfedyna.service.AuthService;
-import com.yfedyna.service.UserService;
+import com.yfedyna.userservice.dto.UserInfoResponse;
+import com.yfedyna.userservice.model.UserEntity;
+import com.yfedyna.userservice.service.AuthService;
+import com.yfedyna.userservice.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;

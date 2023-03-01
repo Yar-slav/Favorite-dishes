@@ -1,4 +1,4 @@
-package com.yfedyna.model;
+package com.yfedyna.userservice.model;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

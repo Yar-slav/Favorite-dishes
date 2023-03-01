@@ -1,4 +1,4 @@
-package com.yfedyna;
+package com.yfedyna.userservice;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

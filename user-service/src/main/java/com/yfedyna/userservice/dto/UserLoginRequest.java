@@ -1,4 +1,4 @@
-package com.yfedyna.dto;
+package com.yfedyna.userservice.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

@@ -1,4 +1,4 @@
-package com.yfedyna.exception;
+package com.yfedyna.userservice.exception;
 
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;

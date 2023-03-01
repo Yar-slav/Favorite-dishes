@@ -1,4 +1,4 @@
-package com.yfedyna.model;
+package com.yfedyna.userservice.model;
 
 public enum UserRole {
     USER,

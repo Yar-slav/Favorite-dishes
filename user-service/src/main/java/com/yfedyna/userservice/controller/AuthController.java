@@ -1,9 +1,9 @@
-package com.yfedyna.controller;
+package com.yfedyna.userservice.controller;
 
-import com.yfedyna.dto.LoginResponse;
-import com.yfedyna.dto.UserLoginRequest;
-import com.yfedyna.dto.UserRegistrationRequest;
-import com.yfedyna.service.AuthService;
+import com.yfedyna.userservice.dto.LoginResponse;
+import com.yfedyna.userservice.dto.UserLoginRequest;
+import com.yfedyna.userservice.dto.UserRegistrationRequest;
+import com.yfedyna.userservice.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

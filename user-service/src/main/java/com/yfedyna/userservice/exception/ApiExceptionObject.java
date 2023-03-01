@@ -1,4 +1,4 @@
-package com.yfedyna.exception;
+package com.yfedyna.userservice.exception;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

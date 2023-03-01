@@ -1,6 +1,6 @@
-package com.yfedyna.repository;
+package com.yfedyna.userservice.repository;
 
-import com.yfedyna.model.UserEntity;
+import com.yfedyna.userservice.model.UserEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
