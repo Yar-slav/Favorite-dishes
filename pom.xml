@@ -6,6 +6,8 @@
     <modules>
         <module>user-service</module>
         <module>dish-service</module>
+        <module>discovery-server</module>
+        <module>api-gateway</module>
     </modules>
 
     <parent>
