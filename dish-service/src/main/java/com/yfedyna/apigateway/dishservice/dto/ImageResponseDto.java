@@ -9,9 +9,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class DishRequest {
+public class ImageResponseDto {
 
-    private String name;
-    private String type;
-    private String description;
+    private Long id;
+    private String image;
 }

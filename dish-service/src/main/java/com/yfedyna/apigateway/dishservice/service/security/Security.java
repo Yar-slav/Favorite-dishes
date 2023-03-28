@@ -3,7 +3,6 @@ package com.yfedyna.apigateway.dishservice.service.security;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -16,6 +15,8 @@ import java.util.Set;
 @Slf4j
 @RequiredArgsConstructor
 public class Security {
+
+
     private final WebClient.Builder webClientBuilder;
 
     public Long getUserIdByToken(String token, Set<Roles> roles) {

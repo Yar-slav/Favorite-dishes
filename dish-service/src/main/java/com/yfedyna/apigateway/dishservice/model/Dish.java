@@ -6,14 +6,15 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
-@Table(
-        name = "dishes",
-        uniqueConstraints = {@UniqueConstraint(name = "uc_name", columnNames = {"name"})})
+@Builder(toBuilder = true)
+@Table(name = "dishes")
 public class Dish {
 
     @Id
@@ -30,9 +31,9 @@ public class Dish {
     @Column(name = "description")
     private String description;
 
-    @Column(name = "image")
-    private String image;
-
     @Column(name = "user_id")
     private Long userId;
+
+    @OneToMany(mappedBy = "dish", cascade = CascadeType. ALL)
+    private List<Image> images = new ArrayList<>();
 }
