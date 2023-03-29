@@ -36,4 +36,7 @@ public class Dish {
 
     @OneToMany(mappedBy = "dish", cascade = CascadeType. ALL)
     private List<Image> images = new ArrayList<>();
+
+    @OneToMany(mappedBy = "dish", cascade = CascadeType. ALL)
+    private List<Ingredient> ingredients = new ArrayList<>();
 }

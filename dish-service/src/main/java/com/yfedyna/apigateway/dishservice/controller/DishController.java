@@ -8,7 +8,6 @@ import com.yfedyna.apigateway.dishservice.service.security.Security;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Set;
@@ -23,21 +22,22 @@ public class DishController {
 
     @PostMapping
     public void addDish(
-            @RequestPart("json") DishRequest dishRequest,
-            @RequestParam("files") List<MultipartFile> files,
+            @RequestBody DishRequest dishRequest,
             @RequestHeader("Authorization") String authHeader
     ) {
-        Long userIdByToken = security.getUserIdByToken(authHeader, Set.of(Roles.USER));
-        dishService.createDish(dishRequest, files, userIdByToken);
+        Long userId = security.getUserIdByToken(authHeader, Set.of(Roles.USER));
+        dishService.createDish(dishRequest, userId);
     }
+
+
 
     @GetMapping("/{id}")
     public DishResponseDto getDishById(
             @PathVariable Long id,
             @RequestHeader("Authorization") String authHeader
     ) {
-        Long userIdByToken = security.getUserIdByToken(authHeader, Set.of(Roles.USER));
-        return dishService.getDishById(id, userIdByToken);
+        Long userId = security.getUserIdByToken(authHeader, Set.of(Roles.USER));
+        return dishService.getDishById(id, userId);
     }
 
     @GetMapping
@@ -52,11 +52,10 @@ public class DishController {
     public DishResponseDto update(
             @PathVariable Long id,
             @RequestPart("json") DishRequest dishRequest,
-            @RequestParam("files") List<MultipartFile> files,
             @RequestHeader("Authorization") String authHeader
     ) {
-        Long userIdByToken = security.getUserIdByToken(authHeader, Set.of(Roles.USER));
-        return dishService.updateDish(id, dishRequest, files, userIdByToken);
+        Long userId = security.getUserIdByToken(authHeader, Set.of(Roles.USER));
+        return dishService.updateDish(id, dishRequest, userId);
     }
 
     @DeleteMapping("/{id}")
@@ -64,8 +63,8 @@ public class DishController {
             @PathVariable Long id,
             @RequestHeader("Authorization") String authHeader
     ) {
-        Long userIdByToken = security.getUserIdByToken(authHeader, Set.of(Roles.USER));
-        dishService.deleteById(id, userIdByToken);
+        Long userId = security.getUserIdByToken(authHeader, Set.of(Roles.USER));
+        dishService.deleteById(id, userId);
     }
 
 }

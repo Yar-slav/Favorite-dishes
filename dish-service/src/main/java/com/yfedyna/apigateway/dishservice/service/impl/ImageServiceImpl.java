@@ -22,7 +22,7 @@ public class ImageServiceImpl implements ImageService {
     }
 
     @Override
-    public void deleteAllByDishId(Long dishId) {
+    public void deleteAllImagesFromDbByDishId(Long dishId) {
         imageRepository.deleteAllByDish_Id(dishId);
     }
 

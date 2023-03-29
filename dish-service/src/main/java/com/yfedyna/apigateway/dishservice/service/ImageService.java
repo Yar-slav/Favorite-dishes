@@ -6,5 +6,5 @@ public interface ImageService {
 
     void saveImageToDb(String originFileName, Dish dish);
 
-    void deleteAllByDishId(Long dishId);
+    void deleteAllImagesFromDbByDishId(Long dishId);
 }

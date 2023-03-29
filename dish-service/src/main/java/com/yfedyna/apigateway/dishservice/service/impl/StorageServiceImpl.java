@@ -2,12 +2,17 @@ package com.yfedyna.apigateway.dishservice.service.impl;
 
 import com.amazonaws.HttpMethod;
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.*;
+import com.amazonaws.services.s3.model.DeleteObjectRequest;
+import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
+import com.amazonaws.services.s3.model.ObjectListing;
+import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.yfedyna.apigateway.dishservice.dto.LInksToImagesDto;
 import com.yfedyna.apigateway.dishservice.model.Dish;
 import com.yfedyna.apigateway.dishservice.model.Image;
 import com.yfedyna.apigateway.dishservice.service.DishService;
+import com.yfedyna.apigateway.dishservice.service.ImageService;
 import com.yfedyna.apigateway.dishservice.service.StorageService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -33,18 +38,23 @@ public class StorageServiceImpl implements StorageService {
     private final AmazonS3 s3Client;
 
     private final DishService dishService;
+    private final ImageService imageService;
 
+    @Transactional
     @Override
-    public String uploadFile(MultipartFile file, Long dishId) {
-        String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
+    public void addDishImage(List<MultipartFile> files, Long dishId, Long userId) {
+        Dish dish = dishService.findDishById(dishId);
+        for (MultipartFile file: files) {
+            String originalFilename = System.currentTimeMillis() + "_" + file.getOriginalFilename();
+            imageService.saveImageToDb(originalFilename, dish);
         String folderName = bucketName + "/dishId_" + dishId;
         File fileObj = convertMultipartFileToFile(file);
-        s3Client.putObject(new PutObjectRequest(folderName, fileName, fileObj)); // закомітив щоб файли не заливались на s3
-        return fileName;
+//        s3Client.putObject(new PutObjectRequest(folderName, fileName, fileObj)); // закомітив щоб файли не заливались на s3
+        }
     }
 
     @Override
-    public LInksToImagesDto generateLinksForDownloadImages(Long dishId, Long userIdByToken) {
+    public LInksToImagesDto generateLinksForDownloadImages(Long dishId, Long userId) {
         Dish dish = dishService.findDishById(dishId);
 
         // TODO: 3/29/23  : make validation
@@ -58,14 +68,6 @@ public class StorageServiceImpl implements StorageService {
                 .imageUrls(urls)
                 .build();
 
-//        String folderName = getBucketDish(dishId);
-//        S3Object s3Object = s3Client.getObject(bucketName, fileName);
-//        S3ObjectInputStream inputStream = s3Object.getObjectContent();
-//        try {
-//            return IOUtils.toByteArray(inputStream);
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
 //        return null;
     }
 
@@ -87,10 +89,17 @@ public class StorageServiceImpl implements StorageService {
         s3Client.deleteObject(bucketName, folderName);
     }
 
+    @Override
+    public void updateDishImage(List<MultipartFile> files, Long dishId, Long userId) {
+        deleteAllFilesByDishId(dishId);
+        imageService.deleteAllImagesFromDbByDishId(dishId);
+        addDishImage(files, dishId, userId);
+    }
+
     private File convertMultipartFileToFile(MultipartFile file) {
         File convertFile = new File(Objects.requireNonNull(file.getOriginalFilename()));
         try (FileOutputStream fos = new FileOutputStream(convertFile)) {
-            fos.write(file.getBytes());
+//            fos.write(file.getBytes());
         } catch (IOException e) {
             log.error("Error converting multipartFile to file", e);
         }
