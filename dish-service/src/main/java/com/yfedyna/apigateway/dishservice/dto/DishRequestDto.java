@@ -11,12 +11,10 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class DishResponseDto {
-    private Long id;
+public class DishRequestDto {
+
     private String name;
     private String type;
     private String description;
-    private List<ImageResponseDto> images;
-    private List<IngredientResponseDto> ingredients;
-    private Long userId;
+    private List<IngredientRequestDto> ingredients;
 }

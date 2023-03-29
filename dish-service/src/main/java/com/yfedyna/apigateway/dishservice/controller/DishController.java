@@ -1,6 +1,6 @@
 package com.yfedyna.apigateway.dishservice.controller;
 
-import com.yfedyna.apigateway.dishservice.dto.DishRequest;
+import com.yfedyna.apigateway.dishservice.dto.DishRequestDto;
 import com.yfedyna.apigateway.dishservice.dto.DishResponseDto;
 import com.yfedyna.apigateway.dishservice.service.DishService;
 import com.yfedyna.apigateway.dishservice.service.security.Roles;
@@ -22,11 +22,11 @@ public class DishController {
 
     @PostMapping
     public void addDish(
-            @RequestBody DishRequest dishRequest,
+            @RequestBody DishRequestDto dishRequestDto,
             @RequestHeader("Authorization") String authHeader
     ) {
         Long userId = security.getUserIdByToken(authHeader, Set.of(Roles.USER));
-        dishService.createDish(dishRequest, userId);
+        dishService.createDish(dishRequestDto, userId);
     }
 
 
@@ -51,11 +51,11 @@ public class DishController {
     @PutMapping("/{id}")
     public DishResponseDto update(
             @PathVariable Long id,
-            @RequestPart("json") DishRequest dishRequest,
+            @RequestBody DishRequestDto dishRequestDto,
             @RequestHeader("Authorization") String authHeader
     ) {
         Long userId = security.getUserIdByToken(authHeader, Set.of(Roles.USER));
-        return dishService.updateDish(id, dishRequest, userId);
+        return dishService.updateDish(id, dishRequestDto, userId);
     }
 
     @DeleteMapping("/{id}")

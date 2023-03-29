@@ -14,29 +14,17 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder(toBuilder = true)
-@Table(name = "dishes")
-public class Dish {
+@Table(name = "products",
+        uniqueConstraints = {@UniqueConstraint(name = "uc_product_name", columnNames = {"name"})})
+public class Product {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "name")
+//    @Column(name = "name", unique = true)
     private String name;
 
-    @Column(name = "type")
-    @Enumerated(EnumType.STRING)
-    private DishType type;
-
-    @Column(name = "description")
-    private String description;
-
-    @Column(name = "user_id")
-    private Long userId;
-
-    @OneToMany(mappedBy = "dish")
-    private List<Image> images = new ArrayList<>();
-
-    @OneToMany(mappedBy = "dish")
+    @OneToMany(mappedBy = "product")
     private List<Ingredient> ingredients = new ArrayList<>();
 }

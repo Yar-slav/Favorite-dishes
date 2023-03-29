@@ -9,9 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class DishRequest {
-
-    private String name;
-    private String type;
-    private String description;
+public class IngredientResponseDto {
+    private String productName;
+    private String amount;
 }
