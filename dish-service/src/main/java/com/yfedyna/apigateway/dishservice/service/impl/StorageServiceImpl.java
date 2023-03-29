@@ -1,8 +1,12 @@
 package com.yfedyna.apigateway.dishservice.service.impl;
 
+import com.amazonaws.HttpMethod;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.*;
-import com.amazonaws.util.IOUtils;
+import com.yfedyna.apigateway.dishservice.dto.LInksToImagesDto;
+import com.yfedyna.apigateway.dishservice.model.Dish;
+import com.yfedyna.apigateway.dishservice.model.Image;
+import com.yfedyna.apigateway.dishservice.service.DishService;
 import com.yfedyna.apigateway.dishservice.service.StorageService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,6 +17,9 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.URL;
+import java.util.Date;
+import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -25,32 +32,41 @@ public class StorageServiceImpl implements StorageService {
 
     private final AmazonS3 s3Client;
 
+    private final DishService dishService;
+
     @Override
     public String uploadFile(MultipartFile file, Long dishId) {
+        String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
         String folderName = bucketName + "/dishId_" + dishId;
         File fileObj = convertMultipartFileToFile(file);
-        String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
-        s3Client.putObject(new PutObjectRequest(folderName, fileName, fileObj));
+        s3Client.putObject(new PutObjectRequest(folderName, fileName, fileObj)); // закомітив щоб файли не заливались на s3
         return fileName;
     }
 
     @Override
-    public byte[] downloadFile(String fileName, Long dishId) {
-//        String folderName = getBucketDish(dishId);
-        S3Object s3Object = s3Client.getObject(bucketName, fileName);
-        S3ObjectInputStream inputStream = s3Object.getObjectContent();
-        try {
-            return IOUtils.toByteArray(inputStream);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
+    public LInksToImagesDto generateLinksForDownloadImages(Long dishId, Long userIdByToken) {
+        Dish dish = dishService.findDishById(dishId);
 
-    @Override
-    public String deleteFile(String fileName) {
-//        s3Client.deleteObject(bucketName, fileName);
-        return fileName + " removed...";
+        // TODO: 3/29/23  : make validation
+
+        List<URL> urls = gatAllNameImagesForDish(dish)
+                .stream()
+                .map(this::downloadFile)
+                .toList();
+        return LInksToImagesDto.builder()
+                .dishId(dishId)
+                .imageUrls(urls)
+                .build();
+
+//        String folderName = getBucketDish(dishId);
+//        S3Object s3Object = s3Client.getObject(bucketName, fileName);
+//        S3ObjectInputStream inputStream = s3Object.getObjectContent();
+//        try {
+//            return IOUtils.toByteArray(inputStream);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//        return null;
     }
 
     @Override
@@ -79,5 +95,29 @@ public class StorageServiceImpl implements StorageService {
             log.error("Error converting multipartFile to file", e);
         }
         return convertFile;
+    }
+
+    private List<String> gatAllNameImagesForDish(Dish dish) {
+        return dish.getImages()
+                .stream()
+                .map(Image::getImage)
+                .toList();
+    }
+
+    private URL downloadFile(String path) {
+
+        // TODO: 3/29/23 add folderName to path
+
+        Date expiration = new Date();
+        long expTimeMillis = expiration.getTime();
+        expTimeMillis += 1000 * 60 * 60;
+
+        expiration.setTime(expTimeMillis);
+        GeneratePresignedUrlRequest generatePresignedUrlRequest =
+                new GeneratePresignedUrlRequest(bucketName, path)
+                        .withMethod(HttpMethod.GET)
+                        .withExpiration(expiration);
+        return s3Client.generatePresignedUrl(generatePresignedUrlRequest);
+
     }
 }

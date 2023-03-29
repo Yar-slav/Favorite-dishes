@@ -25,4 +25,5 @@ public class ImageServiceImpl implements ImageService {
     public void deleteAllByDishId(Long dishId) {
         imageRepository.deleteAllByDish_Id(dishId);
     }
+
 }

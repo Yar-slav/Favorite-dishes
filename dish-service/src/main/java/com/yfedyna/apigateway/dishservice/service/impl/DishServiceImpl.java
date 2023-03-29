@@ -46,7 +46,7 @@ public class DishServiceImpl implements DishService {
 
     @Override
     public DishResponseDto getDishById(Long id, Long userIdByToken) {
-        Dish dish = getDishById(id);
+        Dish dish = findDishById(id);
         return getDishResponseDto(dish);
     }
 
@@ -60,7 +60,7 @@ public class DishServiceImpl implements DishService {
     @Transactional
     @Override
     public DishResponseDto updateDish(Long id, DishRequest dishRequest, List<MultipartFile> files, Long userIdByToken) {
-        Dish dish = getDishById(id);
+        Dish dish = findDishById(id);
 
         dish = dish.toBuilder()
                 .name(dishRequest.getName())
@@ -79,13 +79,23 @@ public class DishServiceImpl implements DishService {
 
     @Override
     public void deleteById(Long id, Long userIdByToken) {
-        Dish dish = getDishById(id);
+        Dish dish = findDishById(id);
         dishRepository.delete(dish);
+    }
+
+    @Override
+    public Dish findDishById(Long id) {
+        Optional<Dish> dishOptional = dishRepository.findById(id);
+        if(dishOptional.isPresent()) {
+            return dishOptional.get();
+        } else {
+            throw new ResponseStatusException(HttpStatusCode.valueOf(404), "Dish not found");
+        }
     }
 
     private void uploadToS3AndSaveToDbAllFiles(List<MultipartFile> files, Dish dish) {
         files.forEach(file -> {
-            String originalFilename = storageService.uploadFile(file, dish.getId());
+            String originalFilename = storageService.uploadFile(file, dish.getId()); // забираю доступ до S3
             imageService.saveImageToDb(originalFilename, dish);
         });
     }
@@ -109,14 +119,7 @@ public class DishServiceImpl implements DishService {
                 .build();
     }
 
-    private Dish getDishById(Long id) {
-        Optional<Dish> dishOptional = dishRepository.findById(id);
-        if(dishOptional.isPresent()) {
-            return dishOptional.get();
-        } else {
-            throw new ResponseStatusException(HttpStatusCode.valueOf(404), "Dish not found");
-        }
-    }
+
 
     private static Dish mapToDish(DishRequest dishRequest) {
         return Dish.builder()

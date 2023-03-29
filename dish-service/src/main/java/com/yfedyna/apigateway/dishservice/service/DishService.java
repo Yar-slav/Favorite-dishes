@@ -2,6 +2,7 @@ package com.yfedyna.apigateway.dishservice.service;
 
 import com.yfedyna.apigateway.dishservice.dto.DishRequest;
 import com.yfedyna.apigateway.dishservice.dto.DishResponseDto;
+import com.yfedyna.apigateway.dishservice.model.Dish;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -17,4 +18,6 @@ public interface DishService {
     DishResponseDto updateDish(Long id, DishRequest dishRequest, List<MultipartFile> files, Long userIdByToken);
 
     void deleteById(Long id, Long userIdByToken);
+
+    Dish findDishById(Long id);
 }
