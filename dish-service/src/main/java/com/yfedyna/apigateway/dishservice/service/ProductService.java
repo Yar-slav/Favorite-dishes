@@ -7,5 +7,5 @@ public interface ProductService {
 
     Product saveProduct(String productName);
 
-    void deleteProductWithoudIngredient();
+    void deleteProductWithoutIngredient();
 }

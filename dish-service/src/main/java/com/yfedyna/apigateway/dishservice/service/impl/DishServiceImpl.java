@@ -63,7 +63,7 @@ public class DishServiceImpl implements DishService {
 
         ingredientService.deleteAllIngredientsByDishId(dish.getId());
         dish = ingredientService.saveAllIngredients(dishRequestDto.getIngredients(), dish);
-        productService.deleteProductWithoudIngredient();
+        productService.deleteProductWithoutIngredient();
         return mapToDishResponseDto(dish);
     }
 

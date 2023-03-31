@@ -33,7 +33,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public void deleteProductWithoudIngredient(){
+    public void deleteProductWithoutIngredient(){
 
         List<Long> productsWithoutIngredients = productRepository.findProductsWithoutIngredients();
         productRepository.deleteAllByIdIn(productsWithoutIngredients);
