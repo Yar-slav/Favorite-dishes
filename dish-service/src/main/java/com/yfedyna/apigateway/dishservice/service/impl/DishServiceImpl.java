@@ -8,11 +8,12 @@ import com.yfedyna.apigateway.dishservice.repository.DishRepository;
 import com.yfedyna.apigateway.dishservice.service.DishService;
 import com.yfedyna.apigateway.dishservice.service.IngredientService;
 import com.yfedyna.apigateway.dishservice.service.ProductService;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
@@ -21,6 +22,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class DishServiceImpl implements DishService {
 
     private final DishRepository dishRepository;
@@ -32,14 +34,10 @@ public class DishServiceImpl implements DishService {
     @Override
     public void createDish(DishRequestDto dishRequestDto, Long userId) {
 //        checkIfDishExist(dishRequest.getName()); // подумати чизалишати перевірку на унікальність імені
-        List<IngredientRequestDto> dishRequestDtoIngredients = dishRequestDto.getIngredients();
-
         Dish dish = mapToDish(dishRequestDto);
         dish.setUserId(userId);
         dish = dishRepository.save(dish);
-
-        ingredientService.saveAllIngredients(dishRequestDtoIngredients, dish);
-
+        ingredientService.saveAllIngredients(dishRequestDto.getIngredients(), dish);
     }
 
     @Override
@@ -48,6 +46,7 @@ public class DishServiceImpl implements DishService {
         return mapToDishResponseDto(dish);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<DishResponseDto> getAllDishes(Pageable pageable, String authHeader) {
         return dishRepository.findAll(pageable).stream()
@@ -59,14 +58,12 @@ public class DishServiceImpl implements DishService {
     @Override
     public DishResponseDto updateDish(Long id, DishRequestDto dishRequestDto, Long userId) {
         Dish dish = findDishById(id);
-        // TODO: 3/29/23 get ingredients from dishRequestDto and sent to dish
-        dish.toBuilder()
-                .name(dishRequestDto.getName())
-                .type(DishType.valueOf(dishRequestDto.getType()))
-                .description(dishRequestDto.getDescription())
-//                .ingredients()
-                .build();
-        dishRepository.save(dish);
+        dish = getNewDish(dishRequestDto, dish);
+        dish = dishRepository.save(dish);
+
+        ingredientService.deleteAllIngredientsByDishId(dish.getId());
+        dish = ingredientService.saveAllIngredients(dishRequestDto.getIngredients(), dish);
+        productService.deleteProductWithoudIngredient();
         return mapToDishResponseDto(dish);
     }
 
@@ -98,6 +95,7 @@ public class DishServiceImpl implements DishService {
 
         List<IngredientResponseDto> ingredientRequestDtoList = new ArrayList<>();
         for (int i = 0; i < dish.getIngredients().size(); i++) {
+
             Ingredient ingredient = dish.getIngredients().get(i);
             IngredientResponseDto ingredientResponseDto = ingredientService.mapToIngredientResponseDto(ingredient);
             ingredientRequestDtoList.add(ingredientResponseDto);
@@ -115,6 +113,14 @@ public class DishServiceImpl implements DishService {
 
     private Dish mapToDish(DishRequestDto dishRequestDto) {
         return Dish.builder()
+                .name(dishRequestDto.getName())
+                .type(DishType.valueOf(dishRequestDto.getType()))
+                .description(dishRequestDto.getDescription())
+                .build();
+    }
+
+    private static Dish getNewDish(DishRequestDto dishRequestDto, Dish dish) {
+        return dish.toBuilder()
                 .name(dishRequestDto.getName())
                 .type(DishType.valueOf(dishRequestDto.getType()))
                 .description(dishRequestDto.getDescription())

@@ -12,7 +12,11 @@ public interface IngredientService {
 
     Ingredient mapToIngredient(IngredientRequestDto ingredientRequestDto, Product product);
 
-    void saveAllIngredients(List<IngredientRequestDto> dishRequestDtoIngredients, Dish dish);
+    Dish saveAllIngredients(List<IngredientRequestDto> dishRequestDtoIngredients, Dish dish);
 
     IngredientResponseDto mapToIngredientResponseDto(Ingredient ingredient);
+
+    void deleteAllIngredientsByDishId(Long dishId);
+
 }
+

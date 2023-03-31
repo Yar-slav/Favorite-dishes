@@ -9,10 +9,14 @@ import com.yfedyna.apigateway.dishservice.repository.IngredientRepository;
 import com.yfedyna.apigateway.dishservice.service.IngredientService;
 import com.yfedyna.apigateway.dishservice.service.ProductService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -37,7 +41,13 @@ public class IngredientServiceImpl implements IngredientService {
     }
 
     @Override
-    public void saveAllIngredients(List<IngredientRequestDto> dishRequestDtoIngredients, Dish dish){
+    public void deleteAllIngredientsByDishId(Long dishId) {
+        ingredientRepository.deleteAllByDish_Id(dishId);
+    }
+
+
+    @Override
+    public Dish saveAllIngredients(List<IngredientRequestDto> dishRequestDtoIngredients, Dish dish){
         List<Ingredient> ingredients = new ArrayList<>();
         for(IngredientRequestDto ingredientRequestDto: dishRequestDtoIngredients){
             String productName = ingredientRequestDto.getProductName();
@@ -47,6 +57,17 @@ public class IngredientServiceImpl implements IngredientService {
             ingredient.setDish(dish);
             ingredients.add(ingredient);
         }
+        checkingUniquenessOfTheIngredientsInDish(ingredients);
+
         ingredientRepository.saveAll(ingredients);
+        dish.setIngredients(ingredients);
+        return dish;
+    }
+
+    private static void checkingUniquenessOfTheIngredientsInDish(List<Ingredient> ingredients) {
+        Set<Ingredient> ingredientSet = new HashSet<>(ingredients);
+        if (ingredientSet.size() < ingredients.size()) {
+            throw new ResponseStatusException(HttpStatusCode.valueOf(404), "Ingredient with this product already exist");
+        }
     }
 }

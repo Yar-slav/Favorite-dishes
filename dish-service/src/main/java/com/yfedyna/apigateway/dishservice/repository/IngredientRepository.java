@@ -6,4 +6,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface IngredientRepository extends CrudRepository<Ingredient, Long> {
+
+    void deleteAllByDish_Id(Long dishId);
+
 }

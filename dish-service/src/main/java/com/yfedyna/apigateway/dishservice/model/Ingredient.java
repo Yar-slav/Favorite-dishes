@@ -8,6 +8,7 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder(toBuilder = true)
+@EqualsAndHashCode(of = {"id", "product", "dish"})
 @Table(name = "ingredients")
 public class Ingredient {
 
@@ -17,7 +18,7 @@ public class Ingredient {
 
     private String amount;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @ToString.Exclude
     @JoinColumn(
             name = "product_id",
@@ -26,7 +27,7 @@ public class Ingredient {
     )
     private Product product;
 
-    @ManyToOne()
+    @ManyToOne(fetch = FetchType.LAZY)
     @ToString.Exclude
     @JoinColumn(
             name = "dish_id",
@@ -34,5 +35,4 @@ public class Ingredient {
             foreignKey = @ForeignKey(name = "fk_dish_ingredient")
     )
     private Dish dish;
-
 }

@@ -39,7 +39,6 @@ public class DishController {
         Long userId = security.getUserIdByToken(authHeader, Set.of(Roles.USER));
         return dishService.getDishById(id, userId);
     }
-
     @GetMapping
     public List<DishResponseDto> getAllDishes(
             Pageable pageable,

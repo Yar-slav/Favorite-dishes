@@ -6,4 +6,6 @@ public interface ProductService {
     Product getProductByName(String name);
 
     Product saveProduct(String productName);
+
+    void deleteProductWithoudIngredient();
 }
