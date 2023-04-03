@@ -18,6 +18,9 @@ public class Ingredient {
 
     private String amount;
 
+    @Enumerated(EnumType.STRING)
+    private ImportantIngredient importantIngredient;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @ToString.Exclude
     @JoinColumn(

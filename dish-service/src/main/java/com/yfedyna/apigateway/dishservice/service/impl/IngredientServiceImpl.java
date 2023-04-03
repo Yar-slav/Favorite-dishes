@@ -3,6 +3,7 @@ package com.yfedyna.apigateway.dishservice.service.impl;
 import com.yfedyna.apigateway.dishservice.dto.IngredientRequestDto;
 import com.yfedyna.apigateway.dishservice.dto.IngredientResponseDto;
 import com.yfedyna.apigateway.dishservice.model.Dish;
+import com.yfedyna.apigateway.dishservice.model.ImportantIngredient;
 import com.yfedyna.apigateway.dishservice.model.Ingredient;
 import com.yfedyna.apigateway.dishservice.model.Product;
 import com.yfedyna.apigateway.dishservice.repository.IngredientRepository;
@@ -29,6 +30,7 @@ public class IngredientServiceImpl implements IngredientService {
         return Ingredient.builder()
                 .amount(ingredientRequestDto.getAmount())
                 .product(product)
+                .importantIngredient(ImportantIngredient.valueOf(ingredientRequestDto.getImportantIngredient()))
                 .build();
     }
 
@@ -37,6 +39,7 @@ public class IngredientServiceImpl implements IngredientService {
         return IngredientResponseDto.builder()
                 .amount(ingredient.getAmount())
                 .productName(ingredient.getProduct().getName())
+                .importantIngredient(String.valueOf(ingredient.getImportantIngredient()))
                 .build();
     }
 

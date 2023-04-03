@@ -1,10 +1,12 @@
 package com.yfedyna.apigateway.dishservice.controller;
 
+import com.yfedyna.apigateway.dishservice.dto.DishFilterDto;
 import com.yfedyna.apigateway.dishservice.dto.DishRequestDto;
 import com.yfedyna.apigateway.dishservice.dto.DishResponseDto;
 import com.yfedyna.apigateway.dishservice.service.DishService;
 import com.yfedyna.apigateway.dishservice.service.security.Roles;
 import com.yfedyna.apigateway.dishservice.service.security.Security;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
@@ -22,14 +24,12 @@ public class DishController {
 
     @PostMapping
     public void addDish(
-            @RequestBody DishRequestDto dishRequestDto,
+            @Valid @RequestBody DishRequestDto dishRequestDto,
             @RequestHeader("Authorization") String authHeader
     ) {
         Long userId = security.getUserIdByToken(authHeader, Set.of(Roles.USER));
         dishService.createDish(dishRequestDto, userId);
     }
-
-
 
     @GetMapping("/{id}")
     public DishResponseDto getDishById(
@@ -39,18 +39,21 @@ public class DishController {
         Long userId = security.getUserIdByToken(authHeader, Set.of(Roles.USER));
         return dishService.getDishById(id, userId);
     }
+
     @GetMapping
     public List<DishResponseDto> getAllDishes(
             Pageable pageable,
+            @RequestBody DishFilterDto dishFilterDto,
             @RequestHeader("Authorization") String authHeader
     ) {
-        return dishService.getAllDishes(pageable, authHeader);
+        Long userId = security.getUserIdByToken(authHeader, Set.of(Roles.USER));
+        return dishService.getAllDishes(pageable, dishFilterDto, userId);
     }
 
     @PutMapping("/{id}")
     public DishResponseDto update(
             @PathVariable Long id,
-            @RequestBody DishRequestDto dishRequestDto,
+            @Valid @RequestBody DishRequestDto dishRequestDto,
             @RequestHeader("Authorization") String authHeader
     ) {
         Long userId = security.getUserIdByToken(authHeader, Set.of(Roles.USER));

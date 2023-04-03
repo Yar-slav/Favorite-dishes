@@ -1,5 +1,6 @@
 package com.yfedyna.apigateway.dishservice.service;
 
+import com.yfedyna.apigateway.dishservice.dto.DishFilterDto;
 import com.yfedyna.apigateway.dishservice.dto.DishRequestDto;
 import com.yfedyna.apigateway.dishservice.dto.DishResponseDto;
 import com.yfedyna.apigateway.dishservice.model.Dish;
@@ -12,7 +13,7 @@ public interface DishService {
 
     DishResponseDto getDishById(Long dishId, Long userId);
 
-    List<DishResponseDto> getAllDishes(Pageable pageable, String authHeader);
+    List<DishResponseDto> getAllDishes(Pageable pageable, DishFilterDto dishFilterDto, Long userId);
 
     DishResponseDto updateDish(Long id, DishRequestDto dishRequestDto, Long userId);
 

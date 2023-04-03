@@ -3,11 +3,14 @@ package com.yfedyna.apigateway.dishservice.service.impl;
 import com.yfedyna.apigateway.dishservice.dto.*;
 import com.yfedyna.apigateway.dishservice.model.Dish;
 import com.yfedyna.apigateway.dishservice.model.DishType;
+import com.yfedyna.apigateway.dishservice.model.Image;
 import com.yfedyna.apigateway.dishservice.model.Ingredient;
 import com.yfedyna.apigateway.dishservice.repository.DishRepository;
 import com.yfedyna.apigateway.dishservice.service.DishService;
 import com.yfedyna.apigateway.dishservice.service.IngredientService;
 import com.yfedyna.apigateway.dishservice.service.ProductService;
+import com.yfedyna.apigateway.dishservice.util.DishFiltering;
+import com.yfedyna.apigateway.dishservice.util.DishValidate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
@@ -28,12 +31,16 @@ public class DishServiceImpl implements DishService {
     private final DishRepository dishRepository;
     private final ProductService productService;
     private final IngredientService ingredientService;
+    private final DishValidate dishValidate;
+
+    private final DishFiltering dishFiltering;
 
 
     @Transactional
     @Override
     public void createDish(DishRequestDto dishRequestDto, Long userId) {
-//        checkIfDishExist(dishRequest.getName()); // подумати чизалишати перевірку на унікальність імені
+//        dishValidate.checkIfDishExist(dishRequestDto.getName()); // подумати чизалишати перевірку на унікальність імені
+        dishValidate.validateDishRequestDto(dishRequestDto);
         Dish dish = mapToDish(dishRequestDto);
         dish.setUserId(userId);
         dish = dishRepository.save(dish);
@@ -48,16 +55,25 @@ public class DishServiceImpl implements DishService {
 
     @Transactional(readOnly = true)
     @Override
-    public List<DishResponseDto> getAllDishes(Pageable pageable, String authHeader) {
-        return dishRepository.findAll(pageable).stream()
+    public List<DishResponseDto> getAllDishes(Pageable pageable, DishFilterDto dishFilterDto, Long userId) {
+        dishValidate.validateDishFilterDto(dishFilterDto);
+        List<Dish> dishes;
+        dishes = dishFiltering.getAllMyDishesOrAllDishes(pageable, dishFilterDto.isMyDishes(), userId);
+        dishes = dishFiltering.getDishesByMyProductList(dishFilterDto, dishes);
+        dishes = dishFiltering.sortByTypes(dishFilterDto.getTypes(), dishes);
+        dishes = dishFiltering.getRandomDishIfIsRandomTrue(dishFilterDto.isRandom(), dishes);
+        return dishes.stream()
                 .map(this::mapToDishResponseDto)
                 .toList();
     }
 
     @Transactional
     @Override
-    public DishResponseDto updateDish(Long id, DishRequestDto dishRequestDto, Long userId) {
-        Dish dish = findDishById(id);
+    public DishResponseDto updateDish(Long dishId, DishRequestDto dishRequestDto, Long userId) {
+        dishValidate.validateDishRequestDto(dishRequestDto);
+        Dish dish = findDishById(dishId);
+        dishValidate.checkDishOwner(userId, dish.getUserId());
+
         dish = getNewDish(dishRequestDto, dish);
         dish = dishRepository.save(dish);
 
@@ -67,6 +83,7 @@ public class DishServiceImpl implements DishService {
         return mapToDishResponseDto(dish);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public void deleteById(Long id, Long userIdByToken) {
         Dish dish = findDishById(id);
@@ -83,23 +100,17 @@ public class DishServiceImpl implements DishService {
         }
     }
 
+    private Dish mapToDish(DishRequestDto dishRequestDto) {
+        return Dish.builder()
+                .name(dishRequestDto.getName())
+                .type(DishType.valueOf(dishRequestDto.getType()))
+                .description(dishRequestDto.getDescription())
+                .build();
+    }
+
     private DishResponseDto mapToDishResponseDto(Dish dish) {
-        List<ImageResponseDto> imageResponseDtoList = new ArrayList<>();
-        for (int i = 0; i < dish.getImages().size(); i++) {
-            ImageResponseDto imageResponseDto = ImageResponseDto.builder()
-                    .id(dish.getImages().get(i).getId())
-                    .image(dish.getImages().get(i).getImage())
-                    .build();
-            imageResponseDtoList.add(imageResponseDto);
-        }
-
-        List<IngredientResponseDto> ingredientRequestDtoList = new ArrayList<>();
-        for (int i = 0; i < dish.getIngredients().size(); i++) {
-
-            Ingredient ingredient = dish.getIngredients().get(i);
-            IngredientResponseDto ingredientResponseDto = ingredientService.mapToIngredientResponseDto(ingredient);
-            ingredientRequestDtoList.add(ingredientResponseDto);
-        }
+        List<ImageResponseDto> imageResponseDtoList = getImageResponseDtoList(dish.getImages());
+        List<IngredientResponseDto> ingredientRequestDtoList = getIngredientResponseDtoList(dish.getIngredients());
         return DishResponseDto.builder()
                 .id(dish.getId())
                 .name(dish.getName())
@@ -111,12 +122,27 @@ public class DishServiceImpl implements DishService {
                 .build();
     }
 
-    private Dish mapToDish(DishRequestDto dishRequestDto) {
-        return Dish.builder()
-                .name(dishRequestDto.getName())
-                .type(DishType.valueOf(dishRequestDto.getType()))
-                .description(dishRequestDto.getDescription())
-                .build();
+    private static List<ImageResponseDto> getImageResponseDtoList(List<Image> images) {
+        List<ImageResponseDto> imageResponseDtoList = new ArrayList<>();
+        for (int i = 0; i < images.size(); i++) {
+            String image = images.get(i).getImage();
+            ImageResponseDto imageResponseDto = ImageResponseDto.builder()
+                    .id(images.get(i).getId())
+                    .image(image)
+                    .build();
+            imageResponseDtoList.add(imageResponseDto);
+        }
+        return imageResponseDtoList;
+    }
+
+    private List<IngredientResponseDto> getIngredientResponseDtoList(List<Ingredient> ingredientList) {
+        List<IngredientResponseDto> ingredientRequestDtoList = new ArrayList<>();
+        for (int i = 0; i < ingredientList.size(); i++) {
+            Ingredient ingredient = ingredientList.get(i);
+            IngredientResponseDto ingredientResponseDto = ingredientService.mapToIngredientResponseDto(ingredient);
+            ingredientRequestDtoList.add(ingredientResponseDto);
+        }
+        return ingredientRequestDtoList;
     }
 
     private static Dish getNewDish(DishRequestDto dishRequestDto, Dish dish) {
@@ -125,11 +151,5 @@ public class DishServiceImpl implements DishService {
                 .type(DishType.valueOf(dishRequestDto.getType()))
                 .description(dishRequestDto.getDescription())
                 .build();
-    }
-
-    private void checkIfDishExist(String name) {
-        if (dishRepository.existsByName(name)) {
-            throw new ResponseStatusException(HttpStatusCode.valueOf(409), "Dish with this name already exist");
-        }
     }
 }

@@ -12,4 +12,5 @@ import lombok.NoArgsConstructor;
 public class IngredientResponseDto {
     private String productName;
     private String amount;
+    private String importantIngredient;
 }
