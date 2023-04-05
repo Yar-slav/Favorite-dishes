@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.BatchSize;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,10 +35,10 @@ public class Dish {
     private Long userId;
 
     @OneToMany(mappedBy = "dish")
-    @BatchSize(size = 100)
+//    @BatchSize(size = 100)
     private List<Image> images = new ArrayList<>();
 
     @OneToMany(mappedBy = "dish")
-    @BatchSize(size = 100)
+//    @BatchSize(size = 100)
     private List<Ingredient> ingredients = new ArrayList<>();
 }

@@ -45,6 +45,9 @@ public class DishServiceImpl implements DishService {
         dish.setUserId(userId);
         dish = dishRepository.save(dish);
         ingredientService.saveAllIngredients(dishRequestDto.getIngredients(), dish);
+
+        // TODO: 4/5/23 save images
+
     }
 
     @Override
@@ -57,10 +60,13 @@ public class DishServiceImpl implements DishService {
     @Override
     public List<DishResponseDto> getAllDishes(Pageable pageable, DishFilterDto dishFilterDto, Long userId) {
         dishValidate.validateDishFilterDto(dishFilterDto);
-        List<Dish> dishes;
-        dishes = dishFiltering.getAllMyDishesOrAllDishes(pageable, dishFilterDto.isMyDishes(), userId);
-        dishes = dishFiltering.getDishesByMyProductList(dishFilterDto, dishes);
-        dishes = dishFiltering.sortByTypes(dishFilterDto.getTypes(), dishes);
+
+        List<Dish> dishes = dishRepository.findAllSQL(pageable,
+                dishFiltering.getDishTypes(dishFilterDto.getTypes()),
+                dishFilterDto.getMyProducts(),
+                userId,
+                dishFilterDto.isMyDishes()
+        ).stream().toList();
         dishes = dishFiltering.getRandomDishIfIsRandomTrue(dishFilterDto.isRandom(), dishes);
         return dishes.stream()
                 .map(this::mapToDishResponseDto)
@@ -100,6 +106,7 @@ public class DishServiceImpl implements DishService {
         }
     }
 
+
     private Dish mapToDish(DishRequestDto dishRequestDto) {
         return Dish.builder()
                 .name(dishRequestDto.getName())
@@ -109,6 +116,7 @@ public class DishServiceImpl implements DishService {
     }
 
     private DishResponseDto mapToDishResponseDto(Dish dish) {
+        log.info("dish");
         List<ImageResponseDto> imageResponseDtoList = getImageResponseDtoList(dish.getImages());
         List<IngredientResponseDto> ingredientRequestDtoList = getIngredientResponseDtoList(dish.getIngredients());
         return DishResponseDto.builder()
