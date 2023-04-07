@@ -1,6 +1,5 @@
 package com.yfedyna.apigateway.dishservice.dto;
 
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,14 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class IngredientRequestDto {
-
-
-    @Valid
-    private ProductRequestDto product;
-
-    private String amount;
-
-    @NotBlank(message = "Status of ingredient cannot be empty or null")
-    private String statusIngredient;
+public class ProductRequestDto {
+    @NotBlank(message = "Product name cannot be empty or null")
+    private String name;
 }

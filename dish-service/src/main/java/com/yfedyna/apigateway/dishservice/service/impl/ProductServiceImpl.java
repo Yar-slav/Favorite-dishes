@@ -19,7 +19,7 @@ public class ProductServiceImpl implements ProductService {
 
 
     @Override
-    public Product getProductByName(String name){
+    public Product getProductByName(String name) {
         Optional<Product> productByName = productRepository.findByName(name);
         return productByName.orElseGet(() -> Product.builder()
                 .name(name)
@@ -27,16 +27,14 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Product saveProduct(String productName) {
-        Product product = getProductByName(productName);
-        return productRepository.save(product);
+    public Product saveProduct(Product product) {
+        Product productForSave = getProductByName(product.getName());
+        return productRepository.save(productForSave);
     }
 
     @Override
-    public void deleteProductWithoutIngredient(){
-
+    public void deleteProductWithoutIngredient() {
         List<Long> productsWithoutIngredients = productRepository.findProductsWithoutIngredients();
         productRepository.deleteAllByIdIn(productsWithoutIngredients);
-        log.info("product {}", productsWithoutIngredients);
     }
 }

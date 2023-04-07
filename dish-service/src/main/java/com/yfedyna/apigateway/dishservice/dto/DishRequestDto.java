@@ -26,5 +26,4 @@ public class DishRequestDto {
     @Valid
     @NotEmpty(message = "Ingredients cannot be empty or null. You need add at least one ingredient")
     private List<IngredientRequestDto> ingredients;
-
 }

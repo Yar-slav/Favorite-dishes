@@ -4,7 +4,7 @@ import com.yfedyna.apigateway.dishservice.dto.DishFilterDto;
 import com.yfedyna.apigateway.dishservice.dto.DishRequestDto;
 import com.yfedyna.apigateway.dishservice.dto.IngredientRequestDto;
 import com.yfedyna.apigateway.dishservice.model.DishType;
-import com.yfedyna.apigateway.dishservice.model.ImportantIngredient;
+import com.yfedyna.apigateway.dishservice.model.StatusIngredient;
 import com.yfedyna.apigateway.dishservice.repository.DishRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatusCode;
@@ -31,13 +31,13 @@ public class DishValidate {
 
     private void validateTypeOfAllImportantIngredient(List<IngredientRequestDto> ingredients) {
         for (IngredientRequestDto ingredientRequestDto : ingredients) {
-            String importantIngredient = ingredientRequestDto.getImportantIngredient();
+            String importantIngredient = ingredientRequestDto.getStatusIngredient();
             validateTypeOfImportantIngredient(importantIngredient);
         }
     }
 
     private void validateTypeOfImportantIngredient(String importantIngredient) {
-        List<String> typesImportantIngredient = Arrays.stream(ImportantIngredient.values())
+        List<String> typesImportantIngredient = Arrays.stream(StatusIngredient.values())
                 .map(Enum::toString)
                 .toList();
         if (!typesImportantIngredient.contains(importantIngredient)) {
@@ -66,7 +66,7 @@ public class DishValidate {
 
     public void checkDishOwner(Long userId, Long dishId) {
         if (!dishId.equals(userId)) {
-            throw new ResponseStatusException(HttpStatusCode.valueOf(404), "You can not update this dish");
+            throw new ResponseStatusException(HttpStatusCode.valueOf(404), "You can not update this dish. It's not you dish.");
         }
     }
 

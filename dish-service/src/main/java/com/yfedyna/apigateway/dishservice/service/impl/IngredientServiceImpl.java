@@ -1,9 +1,10 @@
 package com.yfedyna.apigateway.dishservice.service.impl;
 
 import com.yfedyna.apigateway.dishservice.dto.IngredientRequestDto;
-import com.yfedyna.apigateway.dishservice.dto.IngredientResponseDto;
+import com.yfedyna.apigateway.dishservice.dto.ProductRequestDto;
+import com.yfedyna.apigateway.dishservice.mapper.IngredientMapper;
+import com.yfedyna.apigateway.dishservice.mapper.ProductMapper;
 import com.yfedyna.apigateway.dishservice.model.Dish;
-import com.yfedyna.apigateway.dishservice.model.ImportantIngredient;
 import com.yfedyna.apigateway.dishservice.model.Ingredient;
 import com.yfedyna.apigateway.dishservice.model.Product;
 import com.yfedyna.apigateway.dishservice.repository.IngredientRepository;
@@ -25,23 +26,9 @@ public class IngredientServiceImpl implements IngredientService {
 
     private final ProductService productService;
     private final IngredientRepository ingredientRepository;
-    @Override
-    public Ingredient mapToIngredient(IngredientRequestDto ingredientRequestDto, Product product) {
-        return Ingredient.builder()
-                .amount(ingredientRequestDto.getAmount())
-                .product(product)
-                .importantIngredient(ImportantIngredient.valueOf(ingredientRequestDto.getImportantIngredient()))
-                .build();
-    }
 
-    @Override
-    public IngredientResponseDto mapToIngredientResponseDto(Ingredient ingredient) {
-        return IngredientResponseDto.builder()
-                .amount(ingredient.getAmount())
-                .productName(ingredient.getProduct().getName())
-                .importantIngredient(String.valueOf(ingredient.getImportantIngredient()))
-                .build();
-    }
+    private final IngredientMapper ingredientMapper;
+    private final ProductMapper productMapper;
 
     @Override
     public void deleteAllIngredientsByDishId(Long dishId) {
@@ -52,16 +39,17 @@ public class IngredientServiceImpl implements IngredientService {
     @Override
     public Dish saveAllIngredients(List<IngredientRequestDto> dishRequestDtoIngredients, Dish dish){
         List<Ingredient> ingredients = new ArrayList<>();
-        for(IngredientRequestDto ingredientRequestDto: dishRequestDtoIngredients){
-            String productName = ingredientRequestDto.getProductName();
-            Product product = productService.saveProduct(productName);
+        for (IngredientRequestDto ingredientRequestDto: dishRequestDtoIngredients) {
+            ProductRequestDto productRequestDto = ingredientRequestDto.getProduct();
+            Product product = productMapper.toProduct(productRequestDto);
+            product = productService.saveProduct(product);
 
-            Ingredient ingredient = mapToIngredient(ingredientRequestDto, product);
+            Ingredient ingredient = ingredientMapper.toIngredient(ingredientRequestDto);
+            ingredient.setProduct(product);
             ingredient.setDish(dish);
             ingredients.add(ingredient);
         }
         checkingUniquenessOfTheIngredientsInDish(ingredients);
-
         ingredientRepository.saveAll(ingredients);
         dish.setIngredients(ingredients);
         return dish;

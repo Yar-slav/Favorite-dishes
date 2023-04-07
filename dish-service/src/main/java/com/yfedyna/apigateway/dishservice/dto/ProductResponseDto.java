@@ -9,8 +9,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class IngredientResponseDto {
-    private ProductResponseDto product;
-    private String amount;
-    private String statusIngredient;
+public class ProductResponseDto {
+    private String name;
 }

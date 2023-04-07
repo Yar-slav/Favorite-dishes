@@ -5,7 +5,7 @@ import com.yfedyna.apigateway.dishservice.model.Product;
 public interface ProductService {
     Product getProductByName(String name);
 
-    Product saveProduct(String productName);
+    Product saveProduct(Product product);
 
     void deleteProductWithoutIngredient();
 }

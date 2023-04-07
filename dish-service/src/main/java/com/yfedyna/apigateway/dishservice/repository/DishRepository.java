@@ -27,7 +27,8 @@ public interface DishRepository extends CrudRepository<Dish, Long> {
             // дозволяє використовувати параметр types для вибору страв певного типу.
             // Якщо параметр не заданий (NULL), то виводяться страви будь-якого типу.
             "WHERE (:types IS NULL OR (d.type IN :types AND d.type IS NOT NULL)) " +
-//            "WHERE (d.type IN :types AND d.type IS NOT NULL) " +
+//            "WHERE (:types IS EMPTY OR (d.type IN :types AND d.type IS NOT NULL)) " +
+//            "WHERE (:types IS NULL OR d.type IN :types) " +
 
             // обмежує вибірку лише на інгредієнти, позначені як важливі.
             "AND i.importantIngredient = 'ESSENTIAL' " +
@@ -40,10 +41,12 @@ public interface DishRepository extends CrudRepository<Dish, Long> {
 
             // якщо isMyDishes = true то витягує страви у яких поле userId дорівнює переданому значенню userId.
             // Інакше будуть витягнуті всі страви
-            "AND (:isMyDishes = false OR d.userId = :userId)"
+            "AND (:isMyDishes = false OR d.userId = :userId)",
+            nativeQuery = true
     )
     Page<Dish> findAllSQL(Pageable pageable,
                           @Param("types") List<DishType> types,
+//                          @Param("types") List<String> types,
                           @Param("myProducts") List<String> myProducts,
                           @Param("userId") Long userId,
                           @Param("isMyDishes") boolean isMyDishes

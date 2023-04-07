@@ -1,6 +1,7 @@
 package com.yfedyna.apigateway.dishservice.util;
 
-import com.yfedyna.apigateway.dishservice.model.*;
+import com.yfedyna.apigateway.dishservice.model.Dish;
+import com.yfedyna.apigateway.dishservice.model.DishType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Component;
@@ -29,6 +30,19 @@ public class DishFiltering {
         }
         return dishTypes;
     }
+
+//    public List<DishType> getDishTypes(List<String> types) {
+//        List<DishType> dishTypes = new ArrayList<>();
+//        for (String type : types) {
+//            try {
+//                dishTypes.add(DishType.valueOf(type.toUpperCase()));
+//            } catch (IllegalArgumentException e) {
+//                throw new ResponseStatusException(HttpStatusCode.valueOf(404),
+//                        "Type not found. Please choose one of these: " + types);
+//            }
+//        }
+//        return dishTypes;
+//    }
 
     public List<Dish> getRandomDishIfIsRandomTrue(boolean isRandom, List<Dish> dishes) {
         if (isRandom) {

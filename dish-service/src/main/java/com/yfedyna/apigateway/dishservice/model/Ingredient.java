@@ -19,7 +19,8 @@ public class Ingredient {
     private String amount;
 
     @Enumerated(EnumType.STRING)
-    private ImportantIngredient importantIngredient;
+    @Column(name = "status_ingredient")
+    private StatusIngredient statusIngredient;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @ToString.Exclude

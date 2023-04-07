@@ -2,10 +2,7 @@ package com.yfedyna.apigateway.dishservice.service.impl;
 
 import com.amazonaws.HttpMethod;
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.DeleteObjectRequest;
-import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
-import com.amazonaws.services.s3.model.ObjectListing;
-import com.amazonaws.services.s3.model.S3ObjectSummary;
+import com.amazonaws.services.s3.model.*;
 import com.yfedyna.apigateway.dishservice.dto.LInksToImagesDto;
 import com.yfedyna.apigateway.dishservice.model.Dish;
 import com.yfedyna.apigateway.dishservice.model.Image;
@@ -44,12 +41,12 @@ public class StorageServiceImpl implements StorageService {
     @Override
     public void addDishImage(List<MultipartFile> files, Long dishId, Long userId) {
         Dish dish = dishService.findDishById(dishId);
-        for (MultipartFile file: files) {
-            String originalFilename = System.currentTimeMillis() + "_" + file.getOriginalFilename();
-            imageService.saveImageToDb(originalFilename, dish);
-        String folderName = bucketName + "/dishId_" + dishId;
-        File fileObj = convertMultipartFileToFile(file);
-//        s3Client.putObject(new PutObjectRequest(folderName, fileName, fileObj)); // закомітив щоб файли не заливались на s3
+        for (MultipartFile file : files) {
+            String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
+            imageService.saveImageToDb(fileName, dish);
+            String folderName = bucketName + "/dishId_" + dishId;
+            File fileObj = convertMultipartFileToFile(file);
+            s3Client.putObject(new PutObjectRequest(folderName, fileName, fileObj));
         }
     }
 
@@ -99,7 +96,7 @@ public class StorageServiceImpl implements StorageService {
     private File convertMultipartFileToFile(MultipartFile file) {
         File convertFile = new File(Objects.requireNonNull(file.getOriginalFilename()));
         try (FileOutputStream fos = new FileOutputStream(convertFile)) {
-//            fos.write(file.getBytes());
+            fos.write(file.getBytes());
         } catch (IOException e) {
             log.error("Error converting multipartFile to file", e);
         }
