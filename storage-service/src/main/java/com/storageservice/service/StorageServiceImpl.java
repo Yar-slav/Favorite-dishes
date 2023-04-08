@@ -1,20 +1,20 @@
-package com.yfedyna.apigateway.dishservice.service.impl;
+package com.storageservice.service;
 
 import com.amazonaws.HttpMethod;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.*;
-import com.yfedyna.apigateway.dishservice.dto.LInksToImagesDto;
-import com.yfedyna.apigateway.dishservice.model.Dish;
-import com.yfedyna.apigateway.dishservice.model.Image;
-import com.yfedyna.apigateway.dishservice.service.DishService;
-import com.yfedyna.apigateway.dishservice.service.ImageService;
-import com.yfedyna.apigateway.dishservice.service.StorageService;
+import com.storageservice.dto.ImageResponseDto;
+import com.storageservice.dto.LInksToImagesDto;
+import com.storageservice.dto.dish.DishResponseDto;
+import com.storageservice.service.DishService.DishService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -35,28 +35,25 @@ public class StorageServiceImpl implements StorageService {
     private final AmazonS3 s3Client;
 
     private final DishService dishService;
-    private final ImageService imageService;
 
     @Transactional
-    @Override
-    public void addDishImage(List<MultipartFile> files, Long dishId, Long userId) {
-        Dish dish = dishService.findDishById(dishId);
+    public void addDishImages(List<MultipartFile> files, Long dishId) {
         for (MultipartFile file : files) {
             String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
-            imageService.saveImageToDb(fileName, dish);
             String folderName = bucketName + "/dishId_" + dishId;
             File fileObj = convertMultipartFileToFile(file);
             s3Client.putObject(new PutObjectRequest(folderName, fileName, fileObj));
         }
+        // TODO: 4/7/23 send fileNames, dishId to dishService for save to db kafka
     }
 
     @Override
-    public LInksToImagesDto generateLinksForDownloadImages(Long dishId, Long userId) {
-        Dish dish = dishService.findDishById(dishId);
+    public LInksToImagesDto generateLinksForDownloadImages(Long dishId, String token) {
+        DishResponseDto dishResponseDto = dishService.getDishById(dishId, token);
 
         // TODO: 3/29/23  : make validation
 
-        List<URL> urls = gatAllNameImagesForDish(dish)
+        List<URL> urls = gatAllNameImagesForDish(dishResponseDto)
                 .stream()
                 .map(this::downloadFile)
                 .toList();
@@ -64,8 +61,6 @@ public class StorageServiceImpl implements StorageService {
                 .dishId(dishId)
                 .imageUrls(urls)
                 .build();
-
-//        return null;
     }
 
     @Override
@@ -84,13 +79,14 @@ public class StorageServiceImpl implements StorageService {
             }
         }
         s3Client.deleteObject(bucketName, folderName);
+        // TODO: 4/7/23 delete images by dishId  kafka
     }
 
+    @Transactional
     @Override
-    public void updateDishImage(List<MultipartFile> files, Long dishId, Long userId) {
+    public void updateDishImage(List<MultipartFile> files, Long dishId) {
         deleteAllFilesByDishId(dishId);
-        imageService.deleteAllImagesFromDbByDishId(dishId);
-        addDishImage(files, dishId, userId);
+        addDishImages(files, dishId);
     }
 
     private File convertMultipartFileToFile(MultipartFile file) {
@@ -99,14 +95,16 @@ public class StorageServiceImpl implements StorageService {
             fos.write(file.getBytes());
         } catch (IOException e) {
             log.error("Error converting multipartFile to file", e);
+            throw new ResponseStatusException(HttpStatusCode.valueOf(403),
+                    "Error converting multipartFile to file");
         }
         return convertFile;
     }
 
-    private List<String> gatAllNameImagesForDish(Dish dish) {
-        return dish.getImages()
+    private List<String> gatAllNameImagesForDish(DishResponseDto dishResponseDto) {
+        return dishResponseDto.getImages()
                 .stream()
-                .map(Image::getImage)
+                .map(ImageResponseDto::getImage)
                 .toList();
     }
 

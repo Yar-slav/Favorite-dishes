@@ -1,4 +1,4 @@
-package com.yfedyna.apigateway.dishservice.dto;
+package com.storageservice.dto.dish;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,8 +9,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ImageResponseDto {
-
-    private Long id;
-    private String image;
+public class ProductResponseDto {
+    private String name;
 }

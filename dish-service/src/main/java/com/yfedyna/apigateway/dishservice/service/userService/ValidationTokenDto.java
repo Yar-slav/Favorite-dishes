@@ -1,4 +1,4 @@
-package com.yfedyna.apigateway.dishservice.service.security;
+package com.yfedyna.apigateway.dishservice.service.userService;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

@@ -1,4 +1,4 @@
-package com.yfedyna.apigateway.dishservice.service.security;
+package com.yfedyna.apigateway.dishservice.service.userService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,7 +15,6 @@ import java.util.Set;
 @Slf4j
 @RequiredArgsConstructor
 public class Security {
-
 
     private final WebClient.Builder webClientBuilder;
 

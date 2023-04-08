@@ -31,8 +31,6 @@ public class DishServiceImpl implements DishService {
     private final ProductService productService;
     private final IngredientService ingredientService;
     private final ImageService imageService;
-    private final StorageService storageService;
-
 
     private final DishMapper dishMapper;
     private final DishValidate dishValidate;
@@ -83,6 +81,7 @@ public class DishServiceImpl implements DishService {
         ingredientService.deleteAllIngredientsByDishId(dish.getId());
         dish = ingredientService.saveAllIngredients(dishRequestDto.getIngredients(), dish);
         productService.deleteProductWithoutIngredient();
+
         return dishMapper.toDishResponseDto(dish);
     }
 
@@ -90,8 +89,8 @@ public class DishServiceImpl implements DishService {
     @Override
     public void deleteById(Long dishId, Long userIdByToken) {
         Dish dish = findDishById(dishId);
-        storageService.deleteAllFilesByDishId(dishId);
-        imageService.deleteAllImagesFromDbByDishId(dishId);
+        // TODO: 4/7/23  delete image from storage
+//        imageService.deleteAllImagesFromDbByDishId(dishId);
         ingredientService.deleteAllIngredientsByDishId(dishId);
         dishRepository.delete(dish);
     }

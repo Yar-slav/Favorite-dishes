@@ -1,4 +1,4 @@
-package com.yfedyna.apigateway.dishservice.config;
+package com.storageservice.config;
 
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;

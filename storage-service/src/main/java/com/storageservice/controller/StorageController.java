@@ -1,21 +1,18 @@
-package com.yfedyna.apigateway.dishservice.controller;
+package com.storageservice.controller;
 
-import com.yfedyna.apigateway.dishservice.dto.LInksToImagesDto;
-import com.yfedyna.apigateway.dishservice.service.StorageService;
-import com.yfedyna.apigateway.dishservice.service.security.Roles;
-import com.yfedyna.apigateway.dishservice.service.security.Security;
+import com.storageservice.dto.LInksToImagesDto;
+import com.storageservice.service.StorageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
-import java.util.Set;
 
 @RestController
 @RequestMapping("/dish/image")
 @RequiredArgsConstructor
 public class StorageController {
-    private final Security security;
+//    private final Security security;
 
     private final StorageService storageService;
 
@@ -25,8 +22,8 @@ public class StorageController {
             @RequestParam("files") List<MultipartFile> files,
             @RequestHeader("Authorization") String authHeader
     ) {
-        Long userId = security.getUserIdByToken(authHeader, Set.of(Roles.USER));
-        storageService.addDishImage(files, dishId, userId);
+//        Long userId = security.getUserIdByToken(authHeader, Set.of(Roles.USER));
+        storageService.addDishImages(files, dishId);
     }
 
     @PutMapping("/{dishId}")
@@ -35,8 +32,7 @@ public class StorageController {
             @RequestParam("files") List<MultipartFile> files,
             @RequestHeader("Authorization") String authHeader
     ) {
-        Long userId = security.getUserIdByToken(authHeader, Set.of(Roles.USER));
-        storageService.updateDishImage(files, dishId, userId);
+        storageService.updateDishImage(files, dishId);
     }
 
     @GetMapping("/{dishId}")
@@ -44,8 +40,15 @@ public class StorageController {
             @PathVariable Long dishId,
             @RequestHeader("Authorization") String authHeader
     ) {
-        Long userId = security.getUserIdByToken(authHeader, Set.of(Roles.USER));
-        return storageService.generateLinksForDownloadImages(dishId, userId);
+        return storageService.generateLinksForDownloadImages(dishId, authHeader);
 
+    }
+
+    @DeleteMapping("/{dishId}")
+    public void delete(
+            @PathVariable Long dishId,
+            @RequestHeader("Authorization") String authHeader
+    ){
+        storageService.deleteAllFilesByDishId(dishId);
     }
 }

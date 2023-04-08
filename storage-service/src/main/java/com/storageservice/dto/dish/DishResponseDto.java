@@ -1,6 +1,6 @@
-package com.yfedyna.apigateway.dishservice.dto;
+package com.storageservice.dto.dish;
 
-import com.yfedyna.apigateway.dishservice.dto.StorageService.ImageResponseDto;
+import com.storageservice.dto.ImageResponseDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
