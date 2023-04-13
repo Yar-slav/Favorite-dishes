@@ -11,7 +11,6 @@ import com.yfedyna.dishservice.service.DishService;
 import com.yfedyna.dishservice.service.ImageService;
 import com.yfedyna.dishservice.service.IngredientService;
 import com.yfedyna.dishservice.service.ProductService;
-import com.yfedyna.dishservice.util.DishFiltering;
 import com.yfedyna.dishservice.util.DishValidate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,8 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -37,8 +35,6 @@ public class DishServiceImpl implements DishService {
 
     private final DishMapper dishMapper;
     private final DishValidate dishValidate;
-
-    private final DishFiltering dishFiltering;
 
     @Transactional
     @Override
@@ -61,15 +57,9 @@ public class DishServiceImpl implements DishService {
     @Override
     public List<DishResponseDto> getAllDishes(Pageable pageable, DishFilterDto dishFilterDto, Long userId) {
         dishValidate.validateDishFilterDto(dishFilterDto);
-
-        List<Dish> dishes = dishRepository.findAllSQL(pageable,
-                dishFiltering.getDishTypes(dishFilterDto.getTypes()),
-                dishFilterDto.getMyProducts(),
-                userId,
-                dishFilterDto.isMyDishes()
-        ).stream().toList();
-        dishes = dishFiltering.getRandomDishIfIsRandomTrue(dishFilterDto.isRandom(), dishes);
-        return dishes.stream()
+        List<Long> dishIdList = getDishIdListByFilter(pageable, dishFilterDto, userId);
+        dishIdList = getRandomDishIfRandomTrue(dishFilterDto.isRandom(), dishIdList);
+        return dishRepository.findAllByIdIn(dishIdList).stream()
                 .map(dishMapper::toDishResponseDto)
                 .toList();
     }
@@ -108,17 +98,35 @@ public class DishServiceImpl implements DishService {
         }
     }
 
-//    @Override
-//    public Optional<Dish> findDishById(Long id) {
-//        return dishRepository.findById(id);
-//
-//    }
-
     private static Dish getNewDish(DishRequestDto dishRequestDto, Dish dish) {
         return dish.toBuilder()
                 .name(dishRequestDto.getName())
                 .type(DishType.valueOf(dishRequestDto.getType()))
                 .description(dishRequestDto.getDescription())
                 .build();
+    }
+
+    private List<Long> getDishIdListByFilter(Pageable pageable, DishFilterDto dishFilterDto, Long userId) {
+        return dishRepository.findAllSQL(pageable,
+                getDishTypes(dishFilterDto.getTypes()),
+                dishFilterDto.getMyProducts(),
+                userId,
+                dishFilterDto.isMyDishes()
+        ).stream().toList();
+    }
+
+    private static List<String> getDishTypes(List<String> types) {
+        if (types == null || types.isEmpty()) {
+            return null;
+        }
+        return types;
+    }
+
+    private static List<Long> getRandomDishIfRandomTrue(boolean isRandom, List<Long> dishIdList) {
+        if(isRandom) {
+            Long randomDishId = dishIdList.get(new Random().nextInt(dishIdList.size()));
+            dishIdList = Collections.singletonList(randomDishId);
+        }
+        return dishIdList;
     }
 }
