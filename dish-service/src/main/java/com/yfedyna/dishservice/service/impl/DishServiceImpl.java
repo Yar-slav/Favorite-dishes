@@ -83,6 +83,8 @@ public class DishServiceImpl implements DishService {
     @Override
     public void deleteById(Long dishId, Long userId) {
         Dish dish = findDishById(dishId);
+        dishValidate.checkDishOwner(userId, dish.getUserId());
+
         imageService.deleteAllImagesFromDbByDishId(dishId);
         ingredientService.deleteAllIngredientsByDishId(dishId);
         dishRepository.delete(dish);
