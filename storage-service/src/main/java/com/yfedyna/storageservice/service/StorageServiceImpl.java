@@ -2,12 +2,13 @@ package com.yfedyna.storageservice.service;
 
 import com.amazonaws.HttpMethod;
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.*;
+import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
 import com.yfedyna.storageservice.dto.ImageResponseDto;
 import com.yfedyna.storageservice.dto.LInksToImagesDto;
 import com.yfedyna.storageservice.dto.dish.DishResponseDto;
-import com.yfedyna.storageservice.service.DishService.DishService;
+import com.yfedyna.storageservice.service.client.DishClient;
 import com.yfedyna.storageservice.service.kafka.KafkaService;
+import feign.FeignException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -35,8 +36,8 @@ public class StorageServiceImpl implements StorageService {
     private String bucketName;
 
     private final AmazonS3 s3Client;
+    private final DishClient dishClient;
 
-    private final DishService dishService;
     private final KafkaService kafkaService;
 
     @Transactional
@@ -55,7 +56,7 @@ public class StorageServiceImpl implements StorageService {
 
     @Override
     public LInksToImagesDto generateLinksForDownloadImages(Long dishId, String token) {
-        DishResponseDto dishResponseDto = dishService.getDishById(dishId, token);
+        DishResponseDto dishResponseDto = getDishResponseDto(dishId, token);
 
         // TODO: 3/29/23  : make validation
 
@@ -129,5 +130,15 @@ public class StorageServiceImpl implements StorageService {
                         .withExpiration(expiration);
         return s3Client.generatePresignedUrl(generatePresignedUrlRequest);
 
+    }
+
+    private DishResponseDto getDishResponseDto(Long dishId, String token) {
+        DishResponseDto dish;
+        try {
+            dish = dishClient.getDishById(dishId, token);
+        } catch (FeignException feignException) {
+            throw new ResponseStatusException(HttpStatusCode.valueOf(feignException.status()), feignException.getMessage());
+        }
+        return dish;
     }
 }
