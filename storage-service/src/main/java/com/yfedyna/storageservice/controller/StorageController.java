@@ -9,7 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 @RestController
-@RequestMapping("/storage/image")
+@RequestMapping("/storages/image")
 @RequiredArgsConstructor
 public class StorageController {
 

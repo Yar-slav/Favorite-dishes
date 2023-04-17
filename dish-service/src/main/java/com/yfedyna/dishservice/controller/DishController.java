@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Set;
 
 @RestController
-@RequestMapping("/dish")
+@RequestMapping("/dishes")
 @RequiredArgsConstructor
 public class DishController {
 

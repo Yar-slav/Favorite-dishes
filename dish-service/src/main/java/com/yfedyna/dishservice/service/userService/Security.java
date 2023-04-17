@@ -33,7 +33,7 @@ public class Security {
     public ValidationTokenDto getRolesAndUser(String token) {
         return webClientBuilder.build()
                 .get()
-                .uri("http://user-service/user/validate-auth-token")
+                .uri("http://user-service/users/validate-auth-token")
                 .header(HttpHeaders.AUTHORIZATION, token)
                 .retrieve()
                 .onStatus(HttpStatusCode::is4xxClientError,

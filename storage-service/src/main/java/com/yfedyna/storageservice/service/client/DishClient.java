@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 @FeignClient(name = "dish-service")
 public interface DishClient {
 
-    @GetMapping("/dish/{dishId}")
+    @GetMapping("/dishes/{dishId}")
     DishResponseDto getDishById(
             @PathVariable Long dishId,
             @RequestHeader("Authorization") String authHeader
