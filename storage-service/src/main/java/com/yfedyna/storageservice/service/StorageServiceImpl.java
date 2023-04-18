@@ -42,6 +42,7 @@ public class StorageServiceImpl implements StorageService {
 
     @Transactional
     public void addDishImages(List<MultipartFile> files, Long dishId, String token) {
+        log.info("Adding files to S3");
         List<String> fileNames = new ArrayList<>();
         for (MultipartFile file : files) {
             String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
@@ -56,13 +57,11 @@ public class StorageServiceImpl implements StorageService {
 
     @Override
     public LInksToImagesDto generateLinksForDownloadImages(Long dishId, String token) {
+        log.info("Generate links for dish with id: {}", dishId);
         DishResponseDto dishResponseDto = getDishResponseDto(dishId, token);
-
-        // TODO: 3/29/23  : make validation
-
         List<URL> urls = gatAllNameImagesForDish(dishResponseDto)
                 .stream()
-                .map(this::downloadFile)
+                .map(fileName -> downloadFile(fileName, dishId))
                 .toList();
         return LInksToImagesDto.builder()
                 .dishId(dishId)
@@ -72,6 +71,7 @@ public class StorageServiceImpl implements StorageService {
 
     @Override
     public void deleteAllFilesByDishId(Long dishId, String token) {
+        log.info("Delete files by dishId: {}", dishId);
 //        String folderName = "dishId_" + dishId + "/";
 //        ObjectListing objectListing = s3Client.listObjects(bucketName, folderName);
 //        while (true) {
@@ -92,6 +92,7 @@ public class StorageServiceImpl implements StorageService {
     @Transactional
     @Override
     public void updateDishImage(List<MultipartFile> files, Long dishId, String token) {
+        log.info("Update files by dishId {}", dishId);
         deleteAllFilesByDishId(dishId, token);
         addDishImages(files, dishId, token);
     }
@@ -115,17 +116,15 @@ public class StorageServiceImpl implements StorageService {
                 .toList();
     }
 
-    private URL downloadFile(String path) {
-
-        // TODO: 3/29/23 add folderName to path
-
+    private URL downloadFile(String path, Long dishId) {
+        String folderName = bucketName + "/dishId_" + dishId;
         Date expiration = new Date();
         long expTimeMillis = expiration.getTime();
         expTimeMillis += 1000 * 60 * 60;
 
         expiration.setTime(expTimeMillis);
         GeneratePresignedUrlRequest generatePresignedUrlRequest =
-                new GeneratePresignedUrlRequest(bucketName, path)
+                new GeneratePresignedUrlRequest(folderName, path)
                         .withMethod(HttpMethod.GET)
                         .withExpiration(expiration);
         return s3Client.generatePresignedUrl(generatePresignedUrlRequest);
